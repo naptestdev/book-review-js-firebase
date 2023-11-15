@@ -1,0 +1,47 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: inherit;
+}
+
+button {
+  outline: none;
+  border: none;
+  background: unset;
+  color: inherit;
+}
+
+.hero {
+  background: #f7f7f2;
+}
+
+.navbar-btn {
+  background: white;
+  width: 35px;
+  height: 35px;
+  font-size: 20px;
+  border-radius: 9999px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.primary-btn {
+  border-radius: 9999px;
+  background: #edd465;
+  padding: 8px 12px;
+}
+
+.custom-input:focus {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 5, 0.5);
+}

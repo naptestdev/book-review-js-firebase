@@ -1,0 +1,225 @@
+<nav class="navbar navbar-expand-lg container-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><h3>Book Review</h3></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarToggler"
+      aria-controls="navbarToggler"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <button class="navbar-btn">
+          <i class="bx bx-search"></i>
+        </button>
+        <div>
+          <button>
+            <strong class="d-flex align-items-center"
+              >Reviews <i class="bx bx-chevron-down" style="font-size: 25px"></i
+            ></strong>
+          </button>
+        </div>
+        <a href="#/about"><strong>About</strong></a>
+        <a href="#/create" class="primary-btn"
+          ><strong class="d-flex align-items-center gap-1"
+            ><i class="bx bx-pencil bx-tada" style="font-size: 25px"></i> Write
+            a review</strong
+          ></a
+        >
+        <button class="navbar-btn">
+          <i class="bx bxs-user"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container-sm">
+  <h1 class="my-4">Make your review</h1>
+  <form class="input-group mb-3" id="search-form">
+    <input
+      type="text"
+      class="form-control custom-input"
+      name="q"
+      placeholder="ISBN / Book's title"
+      autocomplete="off"
+    />
+    <button class="btn btn-warning" type="submit">Search</button>
+  </form>
+
+  <div id="cards"></div>
+
+  <div id="review-form-card" style="display: none" class="card">
+    <div class="card-body row">
+      <img
+        id="preview-img"
+        class="mb-3 col-lg-2"
+        style="height: 160px; width: 128px"
+      />
+      <div class="col-lg-10">
+        <form id="review-form">
+          <div>
+            <p>Book title: <strong id="book-title"></strong></p>
+            <p>Authors: <strong id="book-authors"></strong></p>
+            <p>Published date: <strong id="book-published-date"></strong></p>
+            <p>Category: <strong id="book-category"></strong></p>
+          </div>
+          <h6>Review Title</h6>
+          <input name="title" class="form-control mb-2 custom-input" />
+          <h6>Review Content</h6>
+          <textarea
+            name="body"
+            class="form-control mb-2 custom-input"
+            rows="6"
+            style="resize: none"
+          ></textarea>
+          <button id="submit-btn" class="btn btn-lg btn-warning float-end me-2">
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
+  import {
+    addDoc,
+    collection,
+    serverTimestamp,
+  } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
+
+  // window.handleSignOut = () => {
+  //   signOut(auth);
+  // };
+
+  // if (auth.currentUser) {
+  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
+  //     <img class="navbar-avatar" src="${auth.currentUser.photoURL}" alt="" />
+  //     <button onclick="handleSignOut()" class="btn btn-danger">Logout</button>
+  //   `;
+  // } else {
+  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
+  //     <a href="#/login" class="btn btn-success">Login</a>
+  //     <a href="#/register" class="btn btn-primary">Register</a>
+  //   `;
+  // }
+
+  const searchForm = document.querySelector("#search-form");
+
+  let currentSelectedBook = null;
+
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=title:${encodeURIComponent(
+        searchForm.q.value
+      )}&maxResults=10`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        document.querySelector("#review-form-card").style.display = "none";
+        document.querySelector("#cards").innerHTML = "";
+        data.items.forEach((item) => {
+          const authorNames = (item.volumeInfo.authors || []).join(", ");
+
+          document.querySelector("#cards").innerHTML += /*html*/ `
+        <div class="card bg-white">
+          <form class="card-body d-flex justify-content-between">
+            <div class="d-flex">
+              <img
+                style="object-fit:cover"
+                class="mt-1"
+                src="https://books.google.com/books/content?id=${
+                  item.id
+                }&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+                height="120"
+                width="90"
+              />
+              <div class="ms-3">
+                <h5 class="text-break">${item.volumeInfo.title}</h5>
+                <div><b>Authors:</b> ${authorNames}</div>
+                <div><b>Date published:</b> ${
+                  item.volumeInfo.publishedDate
+                }</div>
+              </div>
+            </div>
+            <button
+              onclick="window.openReviewForm('${item.id}', '${
+            item.volumeInfo.title
+          }', '${authorNames}', '${item.volumeInfo.publishedDate}', '${
+            item.volumeInfo.categories?.[0] || "Others"
+          }')"
+              style="height: 40px"
+              class="btn btn-outline-warning mt-2"
+              type="button"
+            >
+              Review
+            </button>
+          </form>
+        </div>
+        `;
+        });
+      });
+  });
+
+  window.openReviewForm = (id, title, author, publishedDate, category) => {
+    document.querySelector("#cards").innerHTML = "";
+    document.querySelector("#review-form-card").style.display = "block";
+
+    document
+      .querySelector("#preview-img")
+      .setAttribute(
+        "src",
+        `https://books.google.com/books/content?id=${id}&printsec=frontcover&img=1&zoom=1&source=gbs_api`
+      );
+    document.querySelector("#book-title").innerText = title;
+    document.querySelector("#book-authors").innerText = author;
+    document.querySelector("#book-published-date").innerText = publishedDate;
+    document.querySelector("#book-category").innerText = category;
+
+    currentSelectedBook = {
+      title,
+      author,
+      publishedDate,
+      category,
+    };
+  };
+
+  const reviewForm = document.querySelector("#review-form");
+  reviewForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    document.querySelector("#submit-btn").disabled = true;
+
+    const title = e.target.title.value.trim();
+    const body = e.target.body.value.trim();
+
+    e.target.title.value = "";
+    e.target.body.value = "";
+
+    addDoc(collection(db, "reviews"), {
+      title,
+      body,
+      bookInfo: currentSelectedBook,
+      createdAt: serverTimestamp(),
+    })
+      .then((docRef) => {
+        location.hash = `/review/${docRef.id}`;
+      })
+      .catch((err) => {
+        alert(`Error creating post. ${err}`);
+      })
+      .finally(() => {
+        document.querySelector("#submit-btn").disabled = false;
+      });
+  });
+</script>

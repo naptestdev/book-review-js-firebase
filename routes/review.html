@@ -1,0 +1,178 @@
+<nav class="navbar navbar-expand-lg bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Reddit</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarToggler"
+      aria-controls="navbarToggler"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <div
+        id="navbar-links"
+        class="d-flex align-items-center gap-2 ms-auto"
+      ></div>
+    </div>
+  </div>
+</nav>
+
+<div class="d-flex justify-content-center my-4 mx-2">
+  <div
+    class="w-100 d-flex flex-column align-items-stretch gap-3"
+    style="max-width: 650px"
+  >
+    <div id="post"></div>
+
+    <div id="comment-box-container"></div>
+
+    <div
+      id="comments"
+      class="d-flex flex-column align-items-stretch gap-3"
+    ></div>
+  </div>
+</div>
+
+<script type="module">
+  import { calculateElapsedTime } from "./utils.js";
+  import { auth, db, subscriptions } from "./firebase.js";
+  import { params } from "./router.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
+  import {
+    doc,
+    getDoc,
+    query,
+    collection,
+    orderBy,
+    onSnapshot,
+    addDoc,
+    serverTimestamp,
+  } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
+
+  window.handleSignOut = () => {
+    signOut(auth);
+  };
+
+  if (auth.currentUser) {
+    document.querySelector("#navbar-links").innerHTML = /*html*/ `
+      <img class="navbar-avatar" src="${auth.currentUser.photoURL}" alt="" />
+      <button onclick="handleSignOut()" class="btn btn-danger">Logout</button>
+    `;
+  } else {
+    document.querySelector("#navbar-links").innerHTML = /*html*/ `
+      <a href="#/login" class="btn btn-success">Login</a>
+      <a href="#/register" class="btn btn-primary">Register</a>
+    `;
+  }
+
+  const postId = params.id;
+
+  getDoc(doc(db, "reviews", postId))
+    .then((doc) => {
+      if (doc.exists()) {
+        const post = doc.data();
+
+        document.querySelector("#post").innerHTML = /*html*/ `
+          <div class="p-3 rounded post-item">
+            <p class="mb-1" style="color: #748398">Posted by <span style="color: #000">u/${
+              post.user.displayName
+            }</span> ${calculateElapsedTime(
+          post.createdAt?.seconds ? post.createdAt.seconds * 1000 : Date.now()
+        )}</p>
+            <p class="m-0 fs-3">${post.title}</p>
+            <p class="m-0" style="white-space: pre-wrap">${post.body}</p>
+          </div>
+        `;
+
+        document.querySelector("#comment-box-container").innerHTML = /*html*/ `
+          <form class="my-4" autocomplete="off">
+            <p class="mb-2">${
+              auth.currentUser
+                ? `Comment as ${auth.currentUser.displayName}`
+                : "Sign in to comment"
+            }</p>
+            <input
+              required
+              type="text"
+              class="form-control mb-2"
+              placeholder="Enter your comment..."
+              aria-label="Enter your comment..."
+              id="comment"
+              name="comment"
+              ${auth.currentUser ? "" : "disabled"}
+            />
+            <button class="btn btn-primary" type="submit" ${
+              auth.currentUser ? "" : "disabled"
+            }>Comment</button>
+          </form>
+          `;
+
+        const form = document.querySelector("form");
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const title = e.target.comment.value.trim();
+
+          e.target.comment.value = "";
+
+          addDoc(collection(db, "reviews", postId, "comments"), {
+            title,
+            user: {
+              uid: auth.currentUser.uid,
+              displayName: auth.currentUser.displayName,
+              photoURL: auth.currentUser.photoURL,
+              email: auth.currentUser.email,
+            },
+            createdAt: serverTimestamp(),
+          }).catch((err) => {
+            console.log(err);
+            alert("Failed to comment", err);
+          });
+        });
+
+        const q = query(
+          collection(db, "reviews", postId, "comments"),
+          orderBy("createdAt", "desc")
+        );
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const comments = [];
+
+          querySnapshot.forEach((doc) => {
+            comments.push({ id: doc.id, ...doc.data() });
+
+            let out = "";
+
+            comments.forEach((comment) => {
+              out += /*html*/ `
+                <div class="p-3 rounded post-item">
+                  <p class="mb-1" style="color: #748398"><span style="color: #000">u/${
+                    comment.user.displayName
+                  }</span> ${calculateElapsedTime(
+                comment.createdAt?.seconds
+                  ? comment.createdAt.seconds * 1000
+                  : Date.now()
+              )}</p>
+                  <p class="m-0 fs-3">${comment.title}</p>
+                </div> 
+              `;
+            });
+
+            document.querySelector("#comments").innerHTML = out;
+          });
+        });
+
+        subscriptions.push(unsubscribe);
+      } else {
+        alert("Post not found");
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      alert("Error getting post", err);
+    });
+</script>
