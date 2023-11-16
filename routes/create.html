@@ -70,9 +70,10 @@
             <p>Category: <strong id="book-category"></strong></p>
           </div>
           <h6>Review Title</h6>
-          <input name="title" class="form-control mb-2 custom-input" />
+          <input required name="title" class="form-control mb-2 custom-input" />
           <h6>Review Content</h6>
           <textarea
+            required
             name="body"
             class="form-control mb-2 custom-input"
             rows="6"
@@ -96,28 +97,14 @@
     serverTimestamp,
   } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
 
-  // window.handleSignOut = () => {
-  //   signOut(auth);
-  // };
-
-  // if (auth.currentUser) {
-  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
-  //     <img class="navbar-avatar" src="${auth.currentUser.photoURL}" alt="" />
-  //     <button onclick="handleSignOut()" class="btn btn-danger">Logout</button>
-  //   `;
-  // } else {
-  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
-  //     <a href="#/login" class="btn btn-success">Login</a>
-  //     <a href="#/register" class="btn btn-primary">Register</a>
-  //   `;
-  // }
-
   const searchForm = document.querySelector("#search-form");
 
   let currentSelectedBook = null;
 
   searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    document.querySelector("#search-form button").disabled = true;
 
     fetch(
       `https://www.googleapis.com/books/v1/volumes?q=title:${encodeURIComponent(
@@ -130,44 +117,56 @@
         document.querySelector("#cards").innerHTML = "";
         data.items.forEach((item) => {
           const authorNames = (item.volumeInfo.authors || []).join(", ");
+          const category = item.volumeInfo.categories?.[0] || "Others";
 
           document.querySelector("#cards").innerHTML += /*html*/ `
         <div class="card bg-white">
-          <form class="card-body d-flex justify-content-between">
+          <div class="card-body d-flex justify-content-between">
             <div class="d-flex">
               <img
                 style="object-fit:cover"
                 class="mt-1"
-                src="https://books.google.com/books/content?id=${
-                  item.id
-                }&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+                src="https://books.google.com/books/content?id=${item.id}&printsec=frontcover&img=1&zoom=1&source=gbs_api"
                 height="120"
                 width="90"
               />
               <div class="ms-3">
                 <h5 class="text-break">${item.volumeInfo.title}</h5>
                 <div><b>Authors:</b> ${authorNames}</div>
-                <div><b>Date published:</b> ${
-                  item.volumeInfo.publishedDate
-                }</div>
+                <div><b>Date published:</b> ${item.volumeInfo.publishedDate}</div>
               </div>
             </div>
             <button
-              onclick="window.openReviewForm('${item.id}', '${
-            item.volumeInfo.title
-          }', '${authorNames}', '${item.volumeInfo.publishedDate}', '${
-            item.volumeInfo.categories?.[0] || "Others"
-          }')"
+              id="review-btn-${item.id}"
               style="height: 40px"
               class="btn btn-outline-warning mt-2"
               type="button"
             >
               Review
             </button>
-          </form>
+          </div>
         </div>
         `;
         });
+        data.items.forEach((item) => {
+          const authorNames = (item.volumeInfo.authors || []).join(", ");
+          const category = item.volumeInfo.categories?.[0] || "Others";
+
+          document
+            .querySelector(`#review-btn-${item.id}`)
+            .addEventListener("click", () => {
+              window.openReviewForm(
+                item.id,
+                item.volumeInfo.title,
+                authorNames,
+                item.volumeInfo.publishedDate,
+                category
+              );
+            });
+        });
+      })
+      .finally(() => {
+        document.querySelector("#search-form button").disabled = false;
       });
   });
 
@@ -187,9 +186,10 @@
     document.querySelector("#book-category").innerText = category;
 
     currentSelectedBook = {
+      bookId: id,
       title,
       author,
-      publishedDate,
+      publishedDate: publishedDate || null,
       category,
     };
   };

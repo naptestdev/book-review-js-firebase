@@ -1,6 +1,6 @@
-<nav class="navbar navbar-expand-lg bg-light">
+<nav class="navbar navbar-expand-lg container-sm">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Reddit</a>
+    <a class="navbar-brand" href="#"><h3>Book Review</h3></a>
     <button
       class="navbar-toggler"
       type="button"
@@ -13,10 +13,28 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarToggler">
-      <div
-        id="navbar-links"
-        class="d-flex align-items-center gap-2 ms-auto"
-      ></div>
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <button class="navbar-btn">
+          <i class="bx bx-search"></i>
+        </button>
+        <div>
+          <button>
+            <strong class="d-flex align-items-center"
+              >Reviews <i class="bx bx-chevron-down" style="font-size: 25px"></i
+            ></strong>
+          </button>
+        </div>
+        <a href="#/about"><strong>About</strong></a>
+        <a href="#/create" class="primary-btn"
+          ><strong class="d-flex align-items-center gap-1"
+            ><i class="bx bx-pencil bx-tada" style="font-size: 25px"></i> Write
+            a review</strong
+          ></a
+        >
+        <button class="navbar-btn">
+          <i class="bx bxs-user"></i>
+        </button>
+      </div>
     </div>
   </div>
 </nav>
@@ -26,7 +44,7 @@
     class="w-100 d-flex flex-column align-items-stretch gap-3"
     style="max-width: 650px"
   >
-    <div id="post"></div>
+    <div id="review"></div>
 
     <div id="comment-box-container"></div>
 
@@ -38,7 +56,6 @@
 </div>
 
 <script type="module">
-  import { calculateElapsedTime } from "./utils.js";
   import { auth, db, subscriptions } from "./firebase.js";
   import { params } from "./router.js";
   import { signOut } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
@@ -53,38 +70,17 @@
     serverTimestamp,
   } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
 
-  window.handleSignOut = () => {
-    signOut(auth);
-  };
-
-  if (auth.currentUser) {
-    document.querySelector("#navbar-links").innerHTML = /*html*/ `
-      <img class="navbar-avatar" src="${auth.currentUser.photoURL}" alt="" />
-      <button onclick="handleSignOut()" class="btn btn-danger">Logout</button>
-    `;
-  } else {
-    document.querySelector("#navbar-links").innerHTML = /*html*/ `
-      <a href="#/login" class="btn btn-success">Login</a>
-      <a href="#/register" class="btn btn-primary">Register</a>
-    `;
-  }
-
   const postId = params.id;
 
   getDoc(doc(db, "reviews", postId))
     .then((doc) => {
       if (doc.exists()) {
-        const post = doc.data();
+        const review = doc.data();
 
-        document.querySelector("#post").innerHTML = /*html*/ `
-          <div class="p-3 rounded post-item">
-            <p class="mb-1" style="color: #748398">Posted by <span style="color: #000">u/${
-              post.user.displayName
-            }</span> ${calculateElapsedTime(
-          post.createdAt?.seconds ? post.createdAt.seconds * 1000 : Date.now()
-        )}</p>
-            <p class="m-0 fs-3">${post.title}</p>
-            <p class="m-0" style="white-space: pre-wrap">${post.body}</p>
+        document.querySelector("#review").innerHTML = /*html*/ `
+          <div class="p-3 rounded review-item">
+            <p class="m-0 fs-3">${review.title}</p>
+            <p class="m-0" style="white-space: pre-wrap">${review.body}</p>
           </div>
         `;
 
@@ -149,7 +145,7 @@
 
             comments.forEach((comment) => {
               out += /*html*/ `
-                <div class="p-3 rounded post-item">
+                <div class="p-3 rounded review-item">
                   <p class="mb-1" style="color: #748398"><span style="color: #000">u/${
                     comment.user.displayName
                   }</span> ${calculateElapsedTime(
@@ -173,6 +169,6 @@
     })
     .catch((err) => {
       console.log(err);
-      alert("Error getting post", err);
+      alert("Error getting review", err);
     });
 </script>

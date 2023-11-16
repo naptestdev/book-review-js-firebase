@@ -53,73 +53,72 @@
         Explore reviews & tips
       </button>
     </div>
-    <img style="width: 45%; height: auto" src="./illustration.png" alt="" />
+    <img
+      style="width: 45%; height: auto"
+      src="./assets/illustration.png"
+      alt=""
+    />
   </div>
 </section>
 
+<div class="container-sm" id="main">
+  <h2 class="mt-5 mb-3">Recently Reviewed</h2>
+  <div
+    style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"
+    class="d-grid gap-4"
+    id="reviews"
+  ></div>
+  <h2>Explore by Category</h2>
+</div>
+
 <script type="module">
-  // import { calculateElapsedTime } from "./utils.js";
-  // import { auth, db, subscriptions } from "./firebase.js";
-  // import { signOut } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
-  // import {
-  //   addDoc,
-  //   query,
-  //   orderBy,
-  //   collection,
-  //   onSnapshot,
-  // } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
+  import { auth, db, subscriptions } from "./firebase.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
+  import {
+    addDoc,
+    query,
+    orderBy,
+    collection,
+    onSnapshot,
+    limit,
+  } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
 
-  // window.handleSignOut = () => {
-  //   signOut(auth);
-  // };
+  window.handleSignOut = () => {
+    signOut(auth);
+  };
 
-  // if (auth.currentUser) {
-  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
-  //     <img class="navbar-avatar" src="${auth.currentUser.photoURL}" alt="" />
-  //     <button onclick="handleSignOut()" class="btn btn-danger">Logout</button>
-  //   `;
-  // } else {
-  //   document.querySelector("#navbar-links").innerHTML = /*html*/ `
-  //     <a href="#/login" class="btn btn-success">Login</a>
-  //     <a href="#/register" class="btn btn-primary">Register</a>
-  //   `;
-  // }
+  const q = query(
+    collection(db, "reviews"),
+    orderBy("createdAt", "desc"),
+    limit(8)
+  );
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const reviews = [];
+    querySnapshot.forEach((doc) => {
+      reviews.push({ id: doc.id, ...doc.data() });
+    });
+    if (reviews.length === 0) {
+      document.querySelector("#reviews").innerHTML = /*html*/ `
+        <p class="text-center">There isn't any review. Create the first one now</p>
+      `;
+    } else {
+      let outputHTML = "";
+      reviews.forEach((review) => {
+        outputHTML += /*html*/ `
+          <a class="d-flex flex-column align-items-stretch" href="#/review/${review.id}">
+            <img
+              style="object-fit:cover; width: 100%; aspect-ratio: 3/4; box-shadow: 1px 1px 5px lightgray"
+              class="mt-1"
+              src="https://books.google.com/books/content?id=${review.bookInfo.bookId}&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+            />
+            <h6 class="ellipsis-2-line mt-2 mb-1">${review.title}</h6>
+            <p class="text-secondary" style="font-size: 12px">${review.bookInfo.title}</p>
+          </a>
+        `;
+      });
+      document.querySelector("#reviews").innerHTML = outputHTML;
+    }
+  });
 
-  // const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-  // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-  //   document.querySelector("#main").style.display = "flex";
-
-  //   const posts = [];
-  //   querySnapshot.forEach((doc) => {
-  //     posts.push({ id: doc.id, ...doc.data() });
-  //   });
-  //   document.querySelector("#post-count").innerText = `${posts.length} post${
-  //     posts.length > 1 ? "s" : ""
-  //   }`;
-  //   if (posts.length === 0) {
-  //     document.querySelector("#posts").innerHTML = /*html*/ `
-  //       <p class="text-center">There isn't any post. Create the first one now</p>
-  //     `;
-  //   } else {
-  //     let out = "";
-  //     posts.forEach((post) => {
-  //       out += /*html*/ `
-  //         <a href="#/post/${post.id}" class="p-3 rounded post-item">
-  //           <p class="mb-1" style="color: #748398">Posted by <span style="color: #000">u/${
-  //             post.user.displayName
-  //           }</span> ${calculateElapsedTime(
-  //         post.createdAt?.seconds ? post.createdAt.seconds * 1000 : Date.now()
-  //       )}</p>
-  //           <p class="m-0 fs-3">${post.title}</p>
-  //           <p class="m-0 post-body" style="white-space: pre-wrap">${
-  //             post.body
-  //           }</p>
-  //         </a>
-  //       `;
-  //     });
-  //     document.querySelector("#posts").innerHTML = out;
-  //   }
-  // });
-
-  // subscriptions.push(unsubscribe);
+  subscriptions.push(unsubscribe);
 </script>
