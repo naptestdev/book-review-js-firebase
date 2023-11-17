@@ -40,18 +40,17 @@
 </nav>
 
 <div class="d-flex justify-content-center my-4 mx-2">
-  <div
-    class="w-100 d-flex flex-column align-items-stretch gap-3"
-    style="max-width: 650px"
-  >
+  <div class="container">
     <div id="review"></div>
 
-    <div id="comment-box-container"></div>
+    <div class="p-3 border rounded my-5">
+      <div id="comment-box-container"></div>
 
-    <div
-      id="comments"
-      class="d-flex flex-column align-items-stretch gap-3"
-    ></div>
+      <div
+        id="comments"
+        class="d-flex flex-column align-items-stretch gap-3 mt-3"
+      ></div>
+    </div>
   </div>
 </div>
 
@@ -70,6 +69,28 @@
     serverTimestamp,
   } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
 
+  const calculateElapsedTime = (timeCreated) => {
+    const created = new Date(timeCreated).getTime();
+    let periods = {
+      year: 365 * 30 * 24 * 60 * 60 * 1000,
+      month: 30 * 24 * 60 * 60 * 1000,
+      week: 7 * 24 * 60 * 60 * 1000,
+      day: 24 * 60 * 60 * 1000,
+      hour: 60 * 60 * 1000,
+      minute: 60 * 1000,
+    };
+    let diff = Date.now() - created;
+
+    for (const key in periods) {
+      if (diff >= periods[key]) {
+        let result = Math.floor(diff / periods[key]);
+        return `${result} ${result === 1 ? key : key + "s"} ago`;
+      }
+    }
+
+    return "Just now";
+  };
+
   const postId = params.id;
 
   getDoc(doc(db, "reviews", postId))
@@ -78,30 +99,33 @@
         const review = doc.data();
 
         document.querySelector("#review").innerHTML = /*html*/ `
-          <div class="p-3 rounded review-item">
-            <p class="m-0 fs-3">${review.title}</p>
-            <p class="m-0" style="white-space: pre-wrap">${review.body}</p>
+          <div class="d-flex gap-5">
+            <img src="https://books.google.com/books/content?id=${review.bookInfo.bookId}&printsec=frontcover&img=1&zoom=1&source=gbs_api" />
+            <div>
+              <p class="m-0 fs-3">${review.title}</p>
+              <p class="m-0"><strong>Book: </strong>${review.bookInfo.title}</p>
+              <p class="m-0"><strong>Author: </strong>${review.bookInfo.author}</p>
+              <p class="m-0" style="white-space: pre-wrap">${review.body}</p>
+            </div>
           </div>
         `;
 
         document.querySelector("#comment-box-container").innerHTML = /*html*/ `
-          <form class="my-4" autocomplete="off">
-            <p class="mb-2">${
-              auth.currentUser
-                ? `Comment as ${auth.currentUser.displayName}`
-                : "Sign in to comment"
-            }</p>
+          <form class="input-group" autocomplete="off">
             <input
               required
               type="text"
-              class="form-control mb-2"
-              placeholder="Enter your comment..."
-              aria-label="Enter your comment..."
+              class="form-control custom-input"
+              placeholder="${
+                auth.currentUser
+                  ? `Comment as ${auth.currentUser.displayName}`
+                  : "Sign in to comment"
+              }"
               id="comment"
               name="comment"
               ${auth.currentUser ? "" : "disabled"}
             />
-            <button class="btn btn-primary" type="submit" ${
+            <button class="btn btn-warning" type="submit" ${
               auth.currentUser ? "" : "disabled"
             }>Comment</button>
           </form>
@@ -141,24 +165,29 @@
           querySnapshot.forEach((doc) => {
             comments.push({ id: doc.id, ...doc.data() });
 
-            let out = "";
+            let outputHTML = "";
 
             comments.forEach((comment) => {
-              out += /*html*/ `
-                <div class="p-3 rounded review-item">
-                  <p class="mb-1" style="color: #748398"><span style="color: #000">u/${
+              outputHTML += /*html*/ `
+                <div class="d-flex gap-3">
+                  <img style="width: 30px; height: 30px; border-radius: 9999px" src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
                     comment.user.displayName
-                  }</span> ${calculateElapsedTime(
+                  )}" alt="">
+                  <div>
+                    <p class="m-0"><strong>${
+                      comment.user.displayName
+                    }</strong> <span>${calculateElapsedTime(
                 comment.createdAt?.seconds
                   ? comment.createdAt.seconds * 1000
                   : Date.now()
-              )}</p>
-                  <p class="m-0 fs-3">${comment.title}</p>
-                </div> 
+              )}</span class="text-secondary"></p>
+                    <p class="m-0">${comment.title}</p>
+                  </div>
+                </div>
               `;
             });
 
-            document.querySelector("#comments").innerHTML = out;
+            document.querySelector("#comments").innerHTML = outputHTML;
           });
         });
 
