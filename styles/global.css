@@ -53,3 +53,57 @@ button {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
+
+.avatar-action {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-action img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+}
+
+.popup {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  transition: 0.3s;
+  z-index: 2;
+  right: 0;
+  box-shadow: 0 0 10px gray;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.popup button {
+  cursor: pointer;
+  width: 100%;
+  text-wrap: nowrap;
+  border: none;
+  outline: none;
+  background: white;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  transition: 0.3s;
+}
+
+.popup button:hover {
+  background: #e8e8e8;
+}
+
+.popup button i {
+  font-size: 14px !important;
+}
+.popup button {
+  font-size: 14px !important;
+}
+
+.avatar-action:focus-within .popup {
+  opacity: 1;
+  visibility: visible;
+}
