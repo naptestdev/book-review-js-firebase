@@ -24,6 +24,11 @@ button {
   background: #f7f7f2;
 }
 
+.hero .hero-img {
+  width: 45%;
+  height: auto;
+}
+
 .navbar-btn {
   background: white;
   width: 35px;
@@ -116,6 +121,10 @@ button {
   transform: translateY(0);
 }
 
+#reviews {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
 .categories-containers {
   display: flex;
   gap: 10px;
@@ -133,7 +142,6 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  z-index: 1;
 }
 
 .categories-container a {
@@ -141,6 +149,7 @@ button {
   border-radius: 8px;
   background: white;
   transition: 0.3s;
+  z-index: 1;
 }
 
 .categories-container a:hover {
@@ -159,4 +168,28 @@ footer {
   color: white;
   margin-top: 40px;
   padding: 40px 0;
+}
+
+@media screen and (max-width: 576px) {
+  .hero > div {
+    flex-direction: column;
+  }
+
+  .hero .hero-img {
+    height: 300px;
+    width: auto;
+  }
+
+  #reviews {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .categories-containers {
+    flex-direction: column;
+  }
+
+  footer > div {
+    flex-direction: column;
+    gap: 20px;
+  }
 }

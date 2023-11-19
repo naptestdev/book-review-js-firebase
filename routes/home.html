@@ -56,7 +56,7 @@
     </div>
   </nav>
   <div
-    class="container-sm d-flex align-items-center justify-content-between py-5 gap-5"
+    class="container-sm d-flex sm:flex-column align-items-center justify-content-between py-5 gap-5"
   >
     <div>
       <h1 class="fs-1">Reviews and tips for books and more</h1>
@@ -68,21 +68,13 @@
         Explore reviews & tips
       </button>
     </div>
-    <img
-      style="width: 45%; height: auto"
-      src="./assets/illustration.png"
-      alt=""
-    />
+    <img class="hero-img" src="./assets/illustration.png" alt="" />
   </div>
 </section>
 
 <div class="container-sm" id="main">
   <h2 class="mt-5 mb-3">Recently Reviewed</h2>
-  <div
-    style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"
-    class="d-grid gap-4"
-    id="reviews"
-  ></div>
+  <div class="d-grid gap-4" id="reviews"></div>
   <h2 class="mt-5 mb-3">Explore by Category</h2>
   <div class="categories-containers">
     <div class="categories-container">

@@ -80,3 +80,12 @@ body {
 .account:hover {
   text-decoration: underline;
 }
+
+@media screen and (max-width: 768px) {
+  .account-box {
+    padding: 30px;
+  }
+  .account-box img {
+    display: none;
+  }
+}
