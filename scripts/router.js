@@ -35,6 +35,11 @@ const routes = {
     requireAuth: false,
     notRequireAuth: false,
   },
+  "/about": {
+    body: "./routes/about.html",
+    requireAuth: false,
+    notRequireAuth: false,
+  },
 };
 
 const isMatchRoute = (route, pathname) => {

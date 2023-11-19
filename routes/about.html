@@ -1,0 +1,72 @@
+<nav class="navbar navbar-expand-lg container-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><h3>Book Review</h3></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarToggler"
+      aria-controls="navbarToggler"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
+        <div tabindex="0" class="avatar-action">
+          <button class="navbar-btn">
+            <i class="bx bx-search"></i>
+          </button>
+          <form
+            onsubmit="event.preventDefault(); location.href = `/?q=${encodeURIComponent(event.target.q.value.trim())}#/search`"
+            class="popup popup-left"
+          >
+            <div class="input-group">
+              <input
+                required
+                autocomplete="off"
+                name="q"
+                class="form-control custom-input"
+                type="text"
+                placeholder="Search..."
+              />
+              <button class="btn btn-warning" type="submit">
+                <i class="bx bx-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div>
+          <a href="./#/search">
+            <strong class="d-flex align-items-center">Reviews</strong>
+          </a>
+        </div>
+        <a href="#/about"><strong>About</strong></a>
+        <a href="#/create" class="primary-btn"
+          ><strong class="d-flex align-items-center gap-1"
+            ><i class="bx bx-pencil bx-tada" style="font-size: 25px"></i> Write
+            a review</strong
+          ></a
+        >
+        <div id="avatar-action-container"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-sm d-flex">
+  <img
+    style="width: 50%; height: auto"
+    src="./assets/illustration.png"
+    alt=""
+  />
+  <div class="d-flex flex-column justify-content-center">
+    <h2>About us</h2>
+    <p>
+      Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quaerat ea sequi
+      laudantium reiciendis eos, doloremque quia voluptatibus at explicabo
+      facere corporis sit ab cum qui quisquam velit praesentium iste magnam.
+    </p>
+  </div>
+</div>
