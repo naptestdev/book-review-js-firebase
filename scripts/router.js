@@ -1,4 +1,7 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.9.1/firebase-auth.js";
 import { auth, subscriptions } from "./firebase.js";
 
 const routes = {
@@ -27,6 +30,11 @@ const routes = {
     requireAuth: true,
     notRequireAuth: false,
   },
+  "/search": {
+    body: "./routes/search.html",
+    requireAuth: false,
+    notRequireAuth: false,
+  },
 };
 
 const isMatchRoute = (route, pathname) => {
@@ -53,7 +61,7 @@ const isMatchRoute = (route, pathname) => {
 
 export let params = {};
 
-const renderRoute = () => {
+const renderRoute = async () => {
   let hasMatched = false;
   for (const route in routes) {
     const { isMatching, params: loadedParams } = isMatchRoute(
@@ -79,14 +87,11 @@ const renderRoute = () => {
         location.hash = "/";
         break;
       }
-      fetch(routes[route].body)
-        .then((res) => res.text())
-        .then((html) => {
-          document.body.innerHTML = "";
-          document.body.append(
-            document.createRange().createContextualFragment(html)
-          );
-        });
+      const html = await (await fetch(routes[route].body)).text();
+      document.body.innerHTML = "";
+      document.body.append(
+        document.createRange().createContextualFragment(html)
+      );
       break;
     }
   }
@@ -94,6 +99,42 @@ const renderRoute = () => {
   subscriptions.forEach(
     (subscription) => typeof subscription === "function" && subscription()
   );
+
+  renderNavbarAvatarAction();
+};
+
+window.handleSignOut = () => {
+  signOut(auth);
+};
+
+const renderNavbarAvatarAction = () => {
+  if (document.querySelector("#avatar-action-container")) {
+    if (auth.currentUser) {
+      document.querySelector("#avatar-action-container").innerHTML += /*html*/ `
+    <div tabindex="0" class="avatar-action">
+      <img src="${`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+        JSON.parse(localStorage.getItem("currentUser")).username
+      )}`}" />
+      <div class="popup">
+        <button class="action-button">
+          <i class="bx bx-user"></i>
+          <span> Profile</span>
+        </button>
+        <button class="action-button" onclick="handleSignOut()">
+          <i class='bx bx-log-out' ></i>
+          <span> Logout</span>
+        </button>
+      </div>
+    </div>
+  `;
+    } else {
+      document.querySelector("#avatar-action-container").innerHTML += /*html*/ `
+    <a class="navbar-btn" href="#/register">
+      <i class="bx bx-user"></i>
+    </a>
+  `;
+    }
+  }
 };
 
 onAuthStateChanged(auth, () => {

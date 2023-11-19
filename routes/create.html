@@ -14,15 +14,33 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarToggler">
       <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
-        <button class="navbar-btn">
-          <i class="bx bx-search"></i>
-        </button>
-        <div>
-          <button>
-            <strong class="d-flex align-items-center"
-              >Reviews <i class="bx bx-chevron-down" style="font-size: 25px"></i
-            ></strong>
+        <div tabindex="0" class="avatar-action">
+          <button class="navbar-btn">
+            <i class="bx bx-search"></i>
           </button>
+          <form
+            onsubmit="event.preventDefault(); location.href = `/?q=${encodeURIComponent(event.target.q.value.trim())}#/search`"
+            class="popup popup-left"
+          >
+            <div class="input-group">
+              <input
+                required
+                autocomplete="off"
+                name="q"
+                class="form-control custom-input"
+                type="text"
+                placeholder="Search..."
+              />
+              <button class="btn btn-warning" type="submit">
+                <i class="bx bx-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div>
+          <a href="./#/search">
+            <strong class="d-flex align-items-center">Reviews</strong>
+          </a>
         </div>
         <a href="#/about"><strong>About</strong></a>
         <a href="#/create" class="primary-btn"

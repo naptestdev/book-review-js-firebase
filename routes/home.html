@@ -15,16 +15,33 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarToggler">
         <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
-          <button class="navbar-btn">
-            <i class="bx bx-search"></i>
-          </button>
-          <div>
-            <button>
-              <strong class="d-flex align-items-center"
-                >Reviews
-                <i class="bx bx-chevron-down" style="font-size: 25px"></i
-              ></strong>
+          <div tabindex="0" class="avatar-action">
+            <button class="navbar-btn">
+              <i class="bx bx-search"></i>
             </button>
+            <form
+              onsubmit="event.preventDefault(); location.href = `/?q=${encodeURIComponent(event.target.q.value.trim())}#/search`"
+              class="popup popup-left"
+            >
+              <div class="input-group">
+                <input
+                  required
+                  autocomplete="off"
+                  name="q"
+                  class="form-control custom-input"
+                  type="text"
+                  placeholder="Search..."
+                />
+                <button class="btn btn-warning" type="submit">
+                  <i class="bx bx-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <a href="./#/search">
+              <strong class="d-flex align-items-center">Reviews</strong>
+            </a>
           </div>
           <a href="#/about"><strong>About</strong></a>
           <a href="#/create" class="primary-btn"
@@ -66,10 +83,56 @@
     class="d-grid gap-4"
     id="reviews"
   ></div>
-  <h2>Explore by Category</h2>
+  <h2 class="mt-5 mb-3">Explore by Category</h2>
+  <div class="categories-containers">
+    <div class="categories-container">
+      <h6>Books: Fiction</h6>
+      <div>
+        <a href="/?category=History#/search">History</a>
+        <a href="/?category=Science#/search">Science</a>
+        <a href="/?category=Poetry#/search">Poetry</a>
+        <a href="/?category=Juvenile Fiction#/search">Juvenile Fiction</a>
+        <a href="/?category=Young Adult Fiction#/search">Young Adult Fiction</a>
+      </div>
+      <img src="./assets/category-1.png" alt="" />
+    </div>
+    <div class="categories-container">
+      <h6>Books: Non-Fiction</h6>
+      <div>
+        <a href="/?category=Biography & Autobiography#/search"
+          >Biography & Autobiography</a
+        >
+        <a href="/?category=Music#/search">Music</a>
+        <a href="/?category=Computers#/search">Computers</a>
+        <a href="/?category=Philosophy#/search">Philosophy</a>
+        <a href="/?category=Psychology#/search">Psychology</a>
+        <a href="/?category=Self-help#/search">Self-help</a>
+      </div>
+      <img src="./assets/category-2.png" alt="" />
+    </div>
+  </div>
 </div>
 
-<script type="module" src="./scripts/layout.js"></script>
+<footer>
+  <div class="container-sm d-flex justify-content-between">
+    <div>
+      <h4>Book Review</h4>
+      <p>&copy; 2023 All rights reserved</p>
+    </div>
+    <div class="d-flex flex-column">
+      <a href="#">Reviews</a>
+      <a href="#">About us</a>
+      <a href="#">Articles</a>
+      <a href="#">Terms & Condition</a>
+      <a href="#">Privacy policy</a>
+    </div>
+    <div>
+      <h4>Contact us</h4>
+      <a href="#">bookreview@bookreview.com</a>
+    </div>
+  </div>
+</footer>
+
 <script type="module">
   import { auth, db, subscriptions } from "./scripts/firebase.js";
   import {

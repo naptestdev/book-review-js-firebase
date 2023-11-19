@@ -72,12 +72,19 @@ button {
   transition: 0.3s;
   z-index: 2;
   right: 0;
+  transform: translateY(-5px);
   box-shadow: 0 0 10px gray;
   border-radius: 6px;
   overflow: hidden;
+  width: max-content;
 }
 
-.popup button {
+.popup-left {
+  right: unset;
+  left: 0;
+}
+
+.popup .action-button {
   cursor: pointer;
   width: 100%;
   text-wrap: nowrap;
@@ -92,18 +99,64 @@ button {
   transition: 0.3s;
 }
 
-.popup button:hover {
+.popup .action-button:hover {
   background: #e8e8e8;
 }
 
-.popup button i {
+.popup .action-button i {
   font-size: 14px !important;
 }
-.popup button {
+.popup .action-button {
   font-size: 14px !important;
 }
 
 .avatar-action:focus-within .popup {
   opacity: 1;
   visibility: visible;
+  transform: translateY(0);
+}
+
+.categories-containers {
+  display: flex;
+  gap: 10px;
+}
+
+.categories-container {
+  flex: 1;
+  position: relative;
+  background: #f7f7f2;
+  padding: 20px;
+  padding-bottom: 120px;
+}
+
+.categories-container > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 1;
+}
+
+.categories-container a {
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: white;
+  transition: 0.3s;
+}
+
+.categories-container a:hover {
+  background: #edd465;
+}
+
+.categories-container img {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 140px;
+}
+
+footer {
+  background: #435968;
+  color: white;
+  margin-top: 40px;
+  padding: 40px 0;
 }

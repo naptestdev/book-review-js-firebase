@@ -1,0 +1,140 @@
+<nav class="navbar navbar-expand-lg container-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><h3>Book Review</h3></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarToggler"
+      aria-controls="navbarToggler"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
+        <div tabindex="0" class="avatar-action">
+          <button class="navbar-btn">
+            <i class="bx bx-search"></i>
+          </button>
+          <form
+            onsubmit="event.preventDefault(); location.href = `/?q=${encodeURIComponent(event.target.q.value.trim())}#/search`"
+            class="popup popup-left"
+          >
+            <div class="input-group">
+              <input
+                required
+                autocomplete="off"
+                name="q"
+                class="form-control custom-input"
+                type="text"
+                placeholder="Search..."
+              />
+              <button class="btn btn-warning" type="submit">
+                <i class="bx bx-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div>
+          <a href="./#/search">
+            <strong class="d-flex align-items-center">Reviews</strong>
+          </a>
+        </div>
+        <a href="#/about"><strong>About</strong></a>
+        <a href="#/create" class="primary-btn"
+          ><strong class="d-flex align-items-center gap-1"
+            ><i class="bx bx-pencil bx-tada" style="font-size: 25px"></i> Write
+            a review</strong
+          ></a
+        >
+        <div id="avatar-action-container"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-sm" id="main">
+  <h2 class="mt-3 mb-3" id="query"></h2>
+  <div
+    style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"
+    class="d-grid gap-4"
+    id="reviews"
+  ></div>
+</div>
+
+<script type="module">
+  import { db } from "./scripts/firebase.js";
+  import {
+    query,
+    orderBy,
+    collection,
+    getDocs,
+  } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-firestore.js";
+
+  const searchQuery = new URLSearchParams(location.search).get("q");
+  const categoryQuery = new URLSearchParams(location.search).get("category");
+
+  if (categoryQuery)
+    document.querySelector("#query").innerText = `Category: ${categoryQuery}`;
+  else if (!searchQuery)
+    document.querySelector("#query").innerText = "All reviews";
+  else
+    document.querySelector(
+      "#query"
+    ).innerText = `Search result for: ${searchQuery}`;
+
+  const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+
+  let reviews = [];
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    reviews.push({ id: doc.id, ...doc.data() });
+  });
+
+  const removeAccents = (str) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
+
+  const filtered = categoryQuery
+    ? reviews.filter((review) => review.bookInfo.category === categoryQuery)
+    : !searchQuery
+    ? reviews
+    : reviews.filter((review) => {
+        const test = (string) => {
+          return searchQuery
+            .split(" ")
+            .some((phrase) =>
+              removeAccents(string)
+                .toLowerCase()
+                .includes(removeAccents(phrase).toLowerCase())
+            );
+        };
+        return (
+          test(review.title) ||
+          test(review.bookInfo.title) ||
+          test(review.bookInfo.author) ||
+          test(review.body)
+        );
+      });
+
+  let outputHTML = "";
+  filtered.forEach((review) => {
+    outputHTML += /*html*/ `
+          <a class="d-flex flex-column align-items-stretch" href="#/review/${review.id}">
+            <img
+              style="object-fit:cover; width: 100%; aspect-ratio: 3/4; box-shadow: 1px 1px 5px lightgray"
+              class="mt-1"
+              src="https://books.google.com/books/content?id=${review.bookInfo.bookId}&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+            />
+            <h6 class="ellipsis-2-line mt-2 mb-1">${review.title}</h6>
+            <p class="text-secondary" style="font-size: 12px">${review.bookInfo.title}</p>
+          </a>
+        `;
+  });
+  document.querySelector("#reviews").innerHTML = outputHTML;
+</script>
