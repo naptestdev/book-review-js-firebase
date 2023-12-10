@@ -118,7 +118,7 @@ const renderNavbarAvatarAction = () => {
       document.querySelector("#avatar-action-container").innerHTML += /*html*/ `
     <div tabindex="0" class="avatar-action">
       <img src="${`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-        JSON.parse(localStorage.getItem("currentUser")).username
+        auth.currentUser.displayName
       )}`}" />
       <div class="popup">
         <button class="action-button">
